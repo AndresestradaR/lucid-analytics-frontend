@@ -12,7 +12,9 @@ import {
   ShoppingCart,
   Trash2,
   Play,
-  AlertCircle
+  AlertCircle,
+  Package,
+  Wallet
 } from 'lucide-react';
 
 export default function Admin() {
@@ -73,7 +75,7 @@ export default function Admin() {
 
   const openTokenModal = (userItem) => {
     setSelectedUser(userItem);
-    setTokenForm({ jwt_token: '', page_id: userItem.page_id || '' });
+    setTokenForm({ jwt_token: '', page_id: userItem.lucidbot_page_id || '' });
     setShowTokenModal(true);
     setMessage(null);
   };
@@ -88,7 +90,7 @@ export default function Admin() {
     setMessage(null);
 
     try {
-      const response = await fetch(getApiUrl('/admin/set-token'), {
+      const response = await fetch(getApiUrl('/admin/lucidbot/set-token'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getToken()}`,
@@ -121,11 +123,15 @@ export default function Admin() {
     }
   };
 
-  const syncUser = async (userId) => {
-    setSyncing(prev => ({ ...prev, [userId]: true }));
+  const syncUser = async (userId, platform = 'lucidbot') => {
+    setSyncing(prev => ({ ...prev, [`${platform}-${userId}`]: true }));
     
     try {
-      const response = await fetch(getApiUrl('/admin/sync-user'), {
+      const endpoint = platform === 'dropi' 
+        ? '/admin/dropi/sync-user'
+        : '/admin/lucidbot/sync-user';
+      
+      const response = await fetch(getApiUrl(endpoint), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getToken()}`,
@@ -140,18 +146,17 @@ export default function Admin() {
         throw new Error(data.detail || 'Error iniciando sincronización');
       }
 
-      // Mostrar mensaje de éxito
-      alert(`Sincronización iniciada para el usuario`);
+      alert(`Sincronización ${platform.toUpperCase()} iniciada`);
       
     } catch (err) {
       alert(`Error: ${err.message}`);
     } finally {
-      setSyncing(prev => ({ ...prev, [userId]: false }));
+      setSyncing(prev => ({ ...prev, [`${platform}-${userId}`]: false }));
     }
   };
 
   const syncAllUsers = async () => {
-    if (!confirm('¿Sincronizar TODOS los usuarios con token configurado?')) {
+    if (!confirm('¿Sincronizar TODOS los usuarios (LucidBot + Dropi)?')) {
       return;
     }
 
@@ -169,7 +174,7 @@ export default function Admin() {
         throw new Error(data.detail || 'Error iniciando sincronización');
       }
 
-      alert(`Sincronización iniciada para ${data.users.length} usuarios:\n${data.users.join('\n')}`);
+      alert(`Sincronización iniciada:\n\nLucidBot: ${data.lucidbot_users} usuarios\nDropi: ${data.dropi_users} usuarios`);
       
     } catch (err) {
       alert(`Error: ${err.message}`);
@@ -182,7 +187,7 @@ export default function Admin() {
     }
 
     try {
-      const response = await fetch(getApiUrl(`/admin/clear-contacts/${userId}`), {
+      const response = await fetch(getApiUrl(`/admin/lucidbot/clear-contacts/${userId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${getToken()}`
@@ -205,19 +210,23 @@ export default function Admin() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('es-CO', { 
-      day: '2-digit', 
-      month: 'short', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('es-CO', { 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '-';
+    }
   };
 
-  const isTokenExpired = (expiresDate) => {
-    if (!expiresDate) return false;
-    return new Date(expiresDate) < new Date();
+  const formatNumber = (value) => {
+    if (value == null || isNaN(value)) return '0';
+    return value.toLocaleString();
   };
 
   if (loading) {
@@ -238,7 +247,7 @@ export default function Admin() {
               <Users className="w-8 h-8 text-blue-400" />
               Panel de Administración
             </h1>
-            <p className="text-slate-400 mt-1">Gestiona tokens de LucidBot para todos los usuarios</p>
+            <p className="text-slate-400 mt-1">Gestiona sincronización de LucidBot y Dropi</p>
           </div>
           
           <div className="flex gap-3">
@@ -266,17 +275,29 @@ export default function Admin() {
         )}
 
         {/* Users Table */}
-        <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
-          <table className="w-full">
+        <div className="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden overflow-x-auto">
+          <table className="w-full min-w-[1200px]">
             <thead>
               <tr className="bg-slate-700/50">
                 <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Usuario</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Token</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Page ID</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-slate-300">Contactos</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-slate-300">Ventas</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Última Sync</th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-slate-300" colSpan="4">
+                  <span className="text-blue-400">📱 LucidBot</span>
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-slate-300" colSpan="3">
+                  <span className="text-orange-400">📦 Dropi</span>
+                </th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-slate-300">Acciones</th>
+              </tr>
+              <tr className="bg-slate-700/30">
+                <th className="px-4 py-2 text-left text-xs font-medium text-slate-400"></th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400">Token</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400">Contactos</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400">Ventas</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400">Última Sync</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400">Conexión</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400">Órdenes</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400">Wallet</th>
+                <th className="px-4 py-2 text-center text-xs font-medium text-slate-400"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
@@ -290,77 +311,111 @@ export default function Admin() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-4">
-                    {userItem.has_jwt_token ? (
-                      <div className="flex items-center gap-2">
-                        <Check className="w-5 h-5 text-green-400" />
-                        {userItem.token_expires && (
-                          <span className={`text-xs ${isTokenExpired(userItem.token_expires) ? 'text-red-400' : 'text-slate-400'}`}>
-                            {isTokenExpired(userItem.token_expires) ? 'Expirado' : `Exp: ${formatDate(userItem.token_expires)}`}
-                          </span>
-                        )}
-                      </div>
+                  
+                  {/* LucidBot columns */}
+                  <td className="px-4 py-4 text-center">
+                    {userItem.has_lucidbot_token ? (
+                      <Check className="w-5 h-5 text-green-400 mx-auto" />
                     ) : (
-                      <X className="w-5 h-5 text-red-400" />
+                      <X className="w-5 h-5 text-red-400 mx-auto" />
                     )}
-                  </td>
-                  <td className="px-4 py-4 text-slate-300 text-sm">
-                    {userItem.page_id || '-'}
                   </td>
                   <td className="px-4 py-4 text-center">
                     <div className="flex items-center justify-center gap-1 text-blue-400">
                       <Database className="w-4 h-4" />
-                      <span>{userItem.total_contacts.toLocaleString()}</span>
+                      <span>{formatNumber(userItem.lucidbot_contacts)}</span>
                     </div>
                   </td>
                   <td className="px-4 py-4 text-center">
                     <div className="flex items-center justify-center gap-1 text-green-400">
                       <ShoppingCart className="w-4 h-4" />
-                      <span>{userItem.total_ventas.toLocaleString()}</span>
+                      <span>{formatNumber(userItem.lucidbot_ventas)}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-slate-400 text-sm">
-                    {userItem.last_sync ? (
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        {formatDate(userItem.last_sync)}
+                  <td className="px-4 py-4 text-slate-400 text-xs text-center">
+                    {userItem.lucidbot_last_sync ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatDate(userItem.lucidbot_last_sync)}
                       </div>
                     ) : '-'}
                   </td>
+                  
+                  {/* Dropi columns */}
+                  <td className="px-4 py-4 text-center">
+                    {userItem.has_dropi_connection ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <Check className="w-5 h-5 text-green-400" />
+                        <span className="text-xs text-slate-400">{userItem.dropi_country}</span>
+                      </div>
+                    ) : (
+                      <X className="w-5 h-5 text-red-400 mx-auto" />
+                    )}
+                  </td>
+                  <td className="px-4 py-4 text-center">
+                    <div className="flex items-center justify-center gap-1 text-orange-400">
+                      <Package className="w-4 h-4" />
+                      <span>{formatNumber(userItem.dropi_orders)}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-center">
+                    <div className="flex items-center justify-center gap-1 text-purple-400">
+                      <Wallet className="w-4 h-4" />
+                      <span>{formatNumber(userItem.dropi_wallet_movements)}</span>
+                    </div>
+                  </td>
+                  
+                  {/* Actions */}
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => openTokenModal(userItem)}
                         className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
-                        title="Configurar Token"
+                        title="Configurar Token LucidBot"
                       >
                         <Key className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => syncUser(userItem.user_id)}
-                        disabled={!userItem.has_jwt_token || syncing[userItem.user_id]}
+                        onClick={() => syncUser(userItem.user_id, 'lucidbot')}
+                        disabled={!userItem.has_lucidbot_token || syncing[`lucidbot-${userItem.user_id}`]}
                         className={`p-2 rounded-lg transition-colors ${
-                          userItem.has_jwt_token 
-                            ? 'bg-green-600 hover:bg-green-500 text-white' 
+                          userItem.has_lucidbot_token 
+                            ? 'bg-blue-600 hover:bg-blue-500 text-white' 
                             : 'bg-slate-600 text-slate-400 cursor-not-allowed'
                         }`}
-                        title="Sincronizar"
+                        title="Sync LucidBot"
                       >
-                        {syncing[userItem.user_id] ? (
+                        {syncing[`lucidbot-${userItem.user_id}`] ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
                         ) : (
-                          <RefreshCw className="w-4 h-4" />
+                          <Database className="w-4 h-4" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => syncUser(userItem.user_id, 'dropi')}
+                        disabled={!userItem.has_dropi_connection || syncing[`dropi-${userItem.user_id}`]}
+                        className={`p-2 rounded-lg transition-colors ${
+                          userItem.has_dropi_connection 
+                            ? 'bg-orange-600 hover:bg-orange-500 text-white' 
+                            : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                        }`}
+                        title="Sync Dropi"
+                      >
+                        {syncing[`dropi-${userItem.user_id}`] ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Package className="w-4 h-4" />
                         )}
                       </button>
                       <button
                         onClick={() => clearContacts(userItem.user_id, userItem.email)}
-                        disabled={userItem.total_contacts === 0}
+                        disabled={(userItem.lucidbot_contacts || 0) === 0}
                         className={`p-2 rounded-lg transition-colors ${
-                          userItem.total_contacts > 0
+                          (userItem.lucidbot_contacts || 0) > 0
                             ? 'bg-red-600 hover:bg-red-500 text-white'
                             : 'bg-slate-600 text-slate-400 cursor-not-allowed'
                         }`}
-                        title="Limpiar Contactos"
+                        title="Limpiar Contactos LucidBot"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
