@@ -29,21 +29,36 @@ class ApiClient {
       options.body = JSON.stringify(data)
     }
 
-    const response = await fetch(url, options)
-    
-    if (response.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-      throw new Error('Sesión expirada')
+    try {
+      const response = await fetch(url, options)
+      
+      if (response.status === 401) {
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+        throw new Error('Sesión expirada')
+      }
+
+      let responseData
+      try {
+        responseData = await response.json()
+      } catch (jsonError) {
+        // Si no se puede parsear JSON, usar texto o mensaje genérico
+        const text = await response.text().catch(() => '')
+        throw new Error(text || `Error HTTP ${response.status}`)
+      }
+
+      if (!response.ok) {
+        // Extraer mensaje de error del backend
+        const errorMessage = responseData.detail || responseData.message || responseData.error || 'Error en la solicitud'
+        throw new Error(errorMessage)
+      }
+
+      return { data: responseData, status: response.status }
+    } catch (error) {
+      // Re-lanzar el error para que el catch del componente lo maneje
+      console.error(`[API] ${method} ${endpoint} failed:`, error.message)
+      throw error
     }
-
-    const responseData = await response.json()
-
-    if (!response.ok) {
-      throw new Error(responseData.detail || 'Error en la solicitud')
-    }
-
-    return { data: responseData, status: response.status }
   }
 
   get(endpoint) {
