@@ -65,8 +65,12 @@ class ApiClient {
 
 export const api = new ApiClient(API_URL)
 
-// Helpers for formatting
+// Helpers for formatting - con manejo de null/undefined
 export function formatCurrency(value, currency = 'COP') {
+  // Manejar null, undefined, NaN
+  if (value == null || isNaN(value)) {
+    value = 0
+  }
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency,
@@ -76,17 +80,30 @@ export function formatCurrency(value, currency = 'COP') {
 }
 
 export function formatNumber(value) {
+  // Manejar null, undefined, NaN
+  if (value == null || isNaN(value)) {
+    value = 0
+  }
   return new Intl.NumberFormat('es-CO').format(value)
 }
 
 export function formatPercent(value) {
+  // Manejar null, undefined, NaN
+  if (value == null || isNaN(value)) {
+    value = 0
+  }
   return `${value.toFixed(1)}%`
 }
 
 export function formatDate(date) {
-  return new Date(date).toLocaleDateString('es-CO', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
+  if (!date) return '-'
+  try {
+    return new Date(date).toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  } catch {
+    return '-'
+  }
 }
