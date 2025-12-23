@@ -43,47 +43,47 @@ export default function Layout() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Más angosto para mejor responsive */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
-        w-72 bg-dark-900/95 backdrop-blur-xl border-r border-dark-800
+        w-56 bg-dark-900/95 backdrop-blur-xl border-r border-dark-800
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        flex-shrink-0
       `}>
         <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="p-6 border-b border-dark-800">
-            <div className="flex items-center gap-3">
+          {/* Logo - Más compacto */}
+          <div className="p-4 border-b border-dark-800">
+            <div className="flex items-center gap-2">
               <img 
                 src="/logo.jpg" 
                 alt="Trucos Ecomm & Drop" 
-                className="w-12 h-12 rounded-xl object-cover shadow-lg"
+                className="w-10 h-10 rounded-xl object-cover shadow-lg flex-shrink-0"
               />
-              <div>
-                <h1 className="font-display font-bold text-lg text-white">Trucos</h1>
-                <p className="text-xs text-dark-400 font-medium">Ecomm & Drop</p>
+              <div className="min-w-0">
+                <h1 className="font-display font-bold text-base text-white truncate">Trucos</h1>
+                <p className="text-[10px] text-dark-400 font-medium truncate">Ecomm & Drop</p>
               </div>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
+          {/* Navigation - Más compacto */}
+          <nav className="flex-1 p-3 space-y-1">
             {navigation.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200
+                  flex items-center gap-2 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-200
                   ${isActive 
                     ? 'bg-lucid-500/10 text-lucid-400 shadow-sm' 
                     : 'text-dark-400 hover:text-white hover:bg-dark-800/50'
                   }
                 `}
               >
-                <item.icon className="w-5 h-5" />
-                <span>{item.name}</span>
-                <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                <item.icon className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{item.name}</span>
               </NavLink>
             ))}
 
@@ -93,52 +93,52 @@ export default function Layout() {
                 to="/admin"
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200
+                  flex items-center gap-2 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-200
                   ${isActive 
                     ? 'bg-amber-500/10 text-amber-400 shadow-sm' 
                     : 'text-dark-400 hover:text-white hover:bg-dark-800/50'
                   }
                 `}
               >
-                <Shield className="w-5 h-5" />
+                <Shield className="w-4 h-4 flex-shrink-0" />
                 <span>Admin</span>
               </NavLink>
             )}
           </nav>
 
-          {/* Theme Toggle */}
-          <div className="px-4 pb-2">
+          {/* Theme Toggle - Más compacto */}
+          <div className="px-3 pb-2">
             <button
               onClick={toggleTheme}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-dark-400 hover:text-white hover:bg-dark-800/50 transition-all duration-200"
+              className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl font-medium text-sm text-dark-400 hover:text-white hover:bg-dark-800/50 transition-all duration-200"
             >
               {theme === 'dark' ? (
                 <>
-                  <Sun className="w-5 h-5" />
+                  <Sun className="w-4 h-4 flex-shrink-0" />
                   <span>Modo Claro</span>
                 </>
               ) : (
                 <>
-                  <Moon className="w-5 h-5" />
+                  <Moon className="w-4 h-4 flex-shrink-0" />
                   <span>Modo Oscuro</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* User section */}
-          <div className="p-4 border-t border-dark-800">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-dark-800/50">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lucid-400 to-lucid-600 flex items-center justify-center text-white font-semibold text-sm">
+          {/* User section - Más compacto */}
+          <div className="p-3 border-t border-dark-800">
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-dark-800/50">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lucid-400 to-lucid-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-                <p className="text-xs text-dark-400 truncate">{user?.email}</p>
+                <p className="text-xs font-medium text-white truncate">{user?.name}</p>
+                <p className="text-[10px] text-dark-400 truncate">{user?.email}</p>
               </div>
               <button 
                 onClick={handleLogout}
-                className="p-2 text-dark-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                className="p-1.5 text-dark-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors flex-shrink-0"
                 title="Cerrar sesión"
               >
                 <LogOut className="w-4 h-4" />
@@ -149,7 +149,7 @@ export default function Layout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col min-h-screen">
+      <main className="flex-1 flex flex-col min-h-screen min-w-0">
         {/* Mobile header */}
         <header className="lg:hidden sticky top-0 z-30 bg-dark-900/95 backdrop-blur-xl border-b border-dark-800 px-4 py-3">
           <div className="flex items-center justify-between">
@@ -176,8 +176,8 @@ export default function Layout() {
           </div>
         </header>
 
-        {/* Page content */}
-        <div className="flex-1 p-4 lg:p-8 overflow-auto">
+        {/* Page content - Padding reducido en pantallas medianas */}
+        <div className="flex-1 p-4 lg:p-6 overflow-auto">
           <Outlet />
         </div>
       </main>
