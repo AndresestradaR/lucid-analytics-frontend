@@ -2,49 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { api, formatCurrency, formatNumber, formatPercent } from '../utils/api'
 import Chat, { ChatButton } from '../components/Chat'
 import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Users, 
-  ShoppingCart, 
-  Target,
-  Calendar,
-  CalendarDays,
-  RefreshCw,
-  AlertCircle,
-  Zap,
-  ArrowUpRight,
-  ArrowDownRight,
-  Filter,
-  X,
-  Check,
-  ChevronDown,
-  Activity,
-  Package,
-  Truck,
-  RotateCcw,
-  Clock,
-  Wallet,
-  ArrowDownLeft,
-  CircleDollarSign,
-  Receipt
+  TrendingUp, TrendingDown, DollarSign, Users, ShoppingCart, Target,
+  Calendar, CalendarDays, RefreshCw, AlertCircle, Zap, ArrowUpRight,
+  ArrowDownRight, Filter, X, Check, ChevronDown, Activity, Package,
+  Truck, RotateCcw, Clock, Wallet, ArrowDownLeft, CircleDollarSign, Receipt
 } from 'lucide-react'
 import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  Legend
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, Legend
 } from 'recharts'
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
@@ -62,9 +27,7 @@ function StatCard({ title, value, change, icon: Icon, trend, prefix = '', suffix
   return (
     <div className="glass rounded-2xl p-5 card-hover">
       <div className="flex items-start justify-between mb-3">
-        <div className={`p-2.5 rounded-xl ${iconBg}`}>
-          <Icon className={`w-5 h-5 ${iconColor}`} />
-        </div>
+        <div className={`p-2.5 rounded-xl ${iconBg}`}><Icon className={`w-5 h-5 ${iconColor}`} /></div>
         {change !== undefined && (
           <div className={`flex items-center gap-1 text-sm font-medium ${isPositive ? 'text-lucid-400' : 'text-red-400'}`}>
             {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
@@ -73,9 +36,7 @@ function StatCard({ title, value, change, icon: Icon, trend, prefix = '', suffix
         )}
       </div>
       <p className="text-dark-400 text-xs font-medium mb-1">{title}</p>
-      <p className="text-xl font-display font-bold text-white">
-        {prefix}{typeof value === 'number' ? formatNumber(value) : value}{suffix}
-      </p>
+      <p className="text-xl font-display font-bold text-white">{prefix}{typeof value === 'number' ? formatNumber(value) : value}{suffix}</p>
     </div>
   )
 }
@@ -84,48 +45,37 @@ function CampaignFilter({ campaigns, selectedCampaigns, onChange }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false)
-    }
+    function handleClickOutside(event) { if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false) }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-  const toggleCampaign = (campaignName) => {
-    if (selectedCampaigns.includes(campaignName)) onChange(selectedCampaigns.filter(c => c !== campaignName))
-    else onChange([...selectedCampaigns, campaignName])
-  }
-  const selectAll = () => onChange(campaigns)
-  const clearAll = () => onChange([])
-  const selectedCount = selectedCampaigns.length
-  const totalCount = campaigns.length
+  const toggleCampaign = (c) => onChange(selectedCampaigns.includes(c) ? selectedCampaigns.filter(x => x !== c) : [...selectedCampaigns, c])
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 px-3 py-2 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm hover:border-dark-600 transition-colors">
+      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 px-3 py-2 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm hover:border-dark-600">
         <Filter className="w-4 h-4 text-dark-400" />
-        <span className="hidden sm:inline">{selectedCount === 0 ? 'Filtrar' : selectedCount === totalCount ? 'Todas' : `${selectedCount}`}</span>
-        <ChevronDown className={`w-4 h-4 text-dark-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="hidden sm:inline">{selectedCampaigns.length === 0 ? 'Filtrar' : selectedCampaigns.length === campaigns.length ? 'Todas' : `${selectedCampaigns.length}`}</span>
+        <ChevronDown className={`w-4 h-4 text-dark-400 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
         <div className="absolute z-50 mt-2 w-80 bg-dark-800 border border-dark-700 rounded-xl shadow-xl overflow-hidden">
           <div className="flex items-center justify-between p-3 border-b border-dark-700">
             <span className="text-sm font-medium text-white">Campañas</span>
             <div className="flex gap-2">
-              <button onClick={selectAll} className="text-xs text-lucid-400 hover:text-lucid-300">Todas</button>
+              <button onClick={() => onChange(campaigns)} className="text-xs text-lucid-400">Todas</button>
               <span className="text-dark-600">|</span>
-              <button onClick={clearAll} className="text-xs text-dark-400 hover:text-white">Ninguna</button>
+              <button onClick={() => onChange([])} className="text-xs text-dark-400">Ninguna</button>
             </div>
           </div>
           <div className="max-h-64 overflow-y-auto">
-            {campaigns.length === 0 ? (<p className="p-4 text-center text-dark-400 text-sm">No hay campañas</p>) : (
-              campaigns.map((campaign) => (
-                <div key={campaign} onClick={() => toggleCampaign(campaign)} className="flex items-center gap-3 px-4 py-2 hover:bg-dark-700/50 cursor-pointer transition-colors">
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selectedCampaigns.includes(campaign) ? 'bg-lucid-500 border-lucid-500' : 'border-dark-600'}`}>
-                    {selectedCampaigns.includes(campaign) && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                  <span className="text-sm text-white truncate">{campaign}</span>
+            {campaigns.map((c) => (
+              <div key={c} onClick={() => toggleCampaign(c)} className="flex items-center gap-3 px-4 py-2 hover:bg-dark-700/50 cursor-pointer">
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${selectedCampaigns.includes(c) ? 'bg-lucid-500 border-lucid-500' : 'border-dark-600'}`}>
+                  {selectedCampaigns.includes(c) && <Check className="w-3 h-3 text-white" />}
                 </div>
-              ))
-            )}
+                <span className="text-sm text-white truncate">{c}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -137,47 +87,33 @@ function StatusFilter({ selectedStatuses, onChange, adCounts }) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false)
-    }
+    function handleClickOutside(event) { if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false) }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-  const toggleStatus = (statusId) => {
-    if (selectedStatuses.includes(statusId)) onChange(selectedStatuses.filter(s => s !== statusId))
-    else onChange([...selectedStatuses, statusId])
-  }
-  const selectAll = () => onChange(CPA_STATUSES.map(s => s.id))
-  const clearAll = () => onChange([])
-  const selectedCount = selectedStatuses.length
-  const totalCount = CPA_STATUSES.length
-  const getButtonLabel = () => {
-    if (selectedCount === 0) return 'Estados'
-    if (selectedCount === totalCount) return 'Todos'
-    return `${selectedCount}`
-  }
+  const toggleStatus = (s) => onChange(selectedStatuses.includes(s) ? selectedStatuses.filter(x => x !== s) : [...selectedStatuses, s])
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 px-3 py-2 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm hover:border-dark-600 transition-colors">
+      <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 px-3 py-2 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm hover:border-dark-600">
         <Activity className="w-4 h-4 text-dark-400" />
-        <span className="hidden sm:inline">{getButtonLabel()}</span>
-        <ChevronDown className={`w-4 h-4 text-dark-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="hidden sm:inline">{selectedStatuses.length === 0 ? 'Estados' : selectedStatuses.length === CPA_STATUSES.length ? 'Todos' : `${selectedStatuses.length}`}</span>
+        <ChevronDown className={`w-4 h-4 text-dark-400 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
         <div className="absolute z-50 mt-2 w-64 bg-dark-800 border border-dark-700 rounded-xl shadow-xl overflow-hidden">
           <div className="flex items-center justify-between p-3 border-b border-dark-700">
             <span className="text-sm font-medium text-white">Estado CPA</span>
             <div className="flex gap-2">
-              <button onClick={selectAll} className="text-xs text-lucid-400 hover:text-lucid-300">Todos</button>
+              <button onClick={() => onChange(CPA_STATUSES.map(s => s.id))} className="text-xs text-lucid-400">Todos</button>
               <span className="text-dark-600">|</span>
-              <button onClick={clearAll} className="text-xs text-dark-400 hover:text-white">Ninguno</button>
+              <button onClick={() => onChange([])} className="text-xs text-dark-400">Ninguno</button>
             </div>
           </div>
           <div className="py-1">
             {CPA_STATUSES.map((status) => (
-              <div key={status.id} onClick={() => toggleStatus(status.id)} className="flex items-center justify-between px-4 py-2 hover:bg-dark-700/50 cursor-pointer transition-colors">
+              <div key={status.id} onClick={() => toggleStatus(status.id)} className="flex items-center justify-between px-4 py-2 hover:bg-dark-700/50 cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selectedStatuses.includes(status.id) ? 'bg-lucid-500 border-lucid-500' : 'border-dark-600'}`}>
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${selectedStatuses.includes(status.id) ? 'bg-lucid-500 border-lucid-500' : 'border-dark-600'}`}>
                     {selectedStatuses.includes(status.id) && <Check className="w-3 h-3 text-white" />}
                   </div>
                   <span className={`text-sm font-medium ${status.color}`}>{status.label}</span>
@@ -209,9 +145,7 @@ function getAdStatusId(ad) {
 }
 
 function AdTable({ ads }) {
-  if (!ads || ads.length === 0) {
-    return (<div className="text-center py-12 text-dark-400"><Target className="w-12 h-12 mx-auto mb-3 opacity-50" /><p>No hay datos de anuncios</p></div>)
-  }
+  if (!ads || ads.length === 0) return <div className="text-center py-12 text-dark-400"><Target className="w-12 h-12 mx-auto mb-3 opacity-50" /><p>No hay datos de anuncios</p></div>
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -235,7 +169,7 @@ function AdTable({ ads }) {
           {ads.map((ad, index) => {
             const cpaStatus = getCPAStatus(ad.cpa)
             return (
-              <tr key={ad.ad_id} className="border-b border-dark-800 hover:bg-dark-800/50 transition-colors">
+              <tr key={ad.ad_id} className="border-b border-dark-800 hover:bg-dark-800/50">
                 <td className="py-4 px-4">
                   <div className="space-y-1">
                     {ad.campaign_name && <p className="text-amber-400 text-xs font-medium">📁 {ad.campaign_name}</p>}
@@ -244,7 +178,7 @@ function AdTable({ ads }) {
                     <p className="text-dark-300 text-xs font-mono opacity-70">{ad.ad_id}</p>
                   </div>
                 </td>
-                <td className="text-right py-4 px-4 text-white text-sm">{ad.daily_budget ? <span className="text-purple-400">${formatNumber(ad.daily_budget)}/día</span> : ad.lifetime_budget ? <span className="text-purple-400">${formatNumber(ad.lifetime_budget)} total</span> : '-'}</td>
+                <td className="text-right py-4 px-4 text-sm">{ad.daily_budget ? <span className="text-purple-400">${formatNumber(ad.daily_budget)}/día</span> : ad.lifetime_budget ? <span className="text-purple-400">${formatNumber(ad.lifetime_budget)} total</span> : '-'}</td>
                 <td className="text-right py-4 px-4 text-white">{formatCurrency(ad.spend)}</td>
                 <td className="text-right py-4 px-4 text-white">{ad.ctr ? `${ad.ctr.toFixed(2)}%` : '-'}</td>
                 <td className="text-right py-4 px-4 text-white">{ad.cpm ? formatCurrency(ad.cpm) : '-'}</td>
@@ -270,10 +204,7 @@ export default function Dashboard() {
   const [data, setData] = useState(null)
   const [dropiData, setDropiData] = useState(null)
   const [walletHistory, setWalletHistory] = useState(null)
-  const [dateRange, setDateRange] = useState({
-    start: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    end: new Date().toISOString().split('T')[0]
-  })
+  const [dateRange, setDateRange] = useState({ start: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], end: new Date().toISOString().split('T')[0] })
   const [selectedAccount, setSelectedAccount] = useState('')
   const [accounts, setAccounts] = useState([])
   const [selectedCampaigns, setSelectedCampaigns] = useState([])
@@ -314,7 +245,7 @@ export default function Dashboard() {
   }
   const loadDropiData = async () => {
     try { const response = await api.get(`/dropi/summary?start_date=${dateRange.start}&end_date=${dateRange.end}`); setDropiData(response.data) }
-    catch (err) { console.log('Dropi not connected or error:', err); setDropiData(null) }
+    catch (err) { console.log('Dropi not connected:', err); setDropiData(null) }
   }
   const loadWalletHistory = async () => {
     try { const response = await api.get(`/dropi/wallet/history?start_date=${dateRange.start}&end_date=${dateRange.end}`); setWalletHistory(response.data) }
@@ -323,9 +254,8 @@ export default function Dashboard() {
 
   const getStatusCounts = () => {
     if (!data?.ads) return {}
-    const counts = {}
-    CPA_STATUSES.forEach(s => counts[s.id] = 0)
-    let adsToCount = selectedCampaigns.length > 0 ? data.ads.filter(ad => selectedCampaigns.includes(ad.campaign_name)) : data.ads
+    const counts = {}; CPA_STATUSES.forEach(s => counts[s.id] = 0)
+    const adsToCount = selectedCampaigns.length > 0 ? data.ads.filter(ad => selectedCampaigns.includes(ad.campaign_name)) : data.ads
     adsToCount.forEach(ad => { const statusId = getAdStatusId(ad); counts[statusId] = (counts[statusId] || 0) + 1 })
     return counts
   }
@@ -345,7 +275,7 @@ export default function Dashboard() {
     const totalSales = filteredAds.reduce((sum, ad) => sum + (ad.sales || 0), 0)
     return { total_spend: totalSpend, total_revenue: totalRevenue, total_leads: totalLeads, total_sales: totalSales, average_cpa: totalSales > 0 ? totalSpend / totalSales : 0, average_roas: totalSpend > 0 ? totalRevenue / totalSpend : 0, profit: totalRevenue - totalSpend }
   }
-  const prepareChartData = () => { const filteredAds = getFilteredAds(); if (!filteredAds.length) return []; return filteredAds.map(ad => ({ name: ad.ad_name?.substring(0, 15) || 'Ad', gasto: ad.spend, revenue: ad.revenue, leads: ad.leads, ventas: ad.sales })) }
+  const prepareChartData = () => { const filteredAds = getFilteredAds(); if (!filteredAds.length) return []; return filteredAds.map(ad => ({ name: ad.ad_name?.substring(0, 15) || 'Ad', gasto: ad.spend, revenue: ad.revenue })) }
   const preparePieData = () => { const filteredAds = getFilteredAds(); if (!filteredAds.length) return []; return filteredAds.filter(ad => ad.spend > 0).map(ad => ({ name: ad.ad_name?.substring(0, 15) || 'Ad', value: ad.spend })) }
   const prepareDropiPieData = () => {
     if (!dropiData?.orders) return []
@@ -384,15 +314,12 @@ export default function Dashboard() {
           )}
           {availableCampaigns.length > 0 && <CampaignFilter campaigns={availableCampaigns} selectedCampaigns={selectedCampaigns} onChange={setSelectedCampaigns} />}
           {data?.ads?.length > 0 && <StatusFilter selectedStatuses={selectedStatuses} onChange={setSelectedStatuses} adCounts={statusCounts} />}
-          
-          {/* Date Picker Mejorado */}
           <div className="flex items-center gap-1.5 px-3 py-2 bg-dark-800 border border-dark-700 rounded-xl">
             <CalendarDays className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <input type="date" value={dateRange.start} onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))} className="bg-transparent text-white text-sm focus:outline-none w-[105px] cursor-pointer [color-scheme:dark]" />
             <span className="text-amber-400 text-sm font-bold">→</span>
             <input type="date" value={dateRange.end} onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))} className="bg-transparent text-white text-sm focus:outline-none w-[105px] cursor-pointer [color-scheme:dark]" />
           </div>
-
           <button onClick={() => { loadDashboard(); loadDropiData(); loadWalletHistory() }} disabled={loading} className="btn-ghost flex items-center gap-1.5 px-3 py-2">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Actualizar</span>
@@ -400,11 +327,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {error && (<div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400"><AlertCircle className="w-5 h-5" /><p>{error}</p></div>)}
+      {error && <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400"><AlertCircle className="w-5 h-5" /><p>{error}</p></div>}
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (<div key={i} className="glass rounded-2xl p-6 animate-pulse"><div className="w-12 h-12 bg-dark-700 rounded-xl mb-4" /><div className="h-4 bg-dark-700 rounded w-24 mb-2" /><div className="h-8 bg-dark-700 rounded w-32" /></div>))}
+          {[...Array(4)].map((_, i) => <div key={i} className="glass rounded-2xl p-6 animate-pulse"><div className="w-12 h-12 bg-dark-700 rounded-xl mb-4" /><div className="h-4 bg-dark-700 rounded w-24 mb-2" /><div className="h-8 bg-dark-700 rounded w-32" /></div>)}
         </div>
       ) : data?.summary && (
         <>
@@ -417,10 +344,10 @@ export default function Dashboard() {
             <div className="flex-1 h-px bg-gradient-to-r from-blue-500/20 to-transparent" />
           </div>
 
-          {/* Meta Ads Stats */}
+          {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard title="Gasto Total" value={filteredSummary.total_spend} icon={DollarSign} prefix="$" iconColor="text-blue-400" iconBg="bg-blue-500/10" />
-            <StatCard title="Revenue" value={filteredSummary.total_revenue} icon={TrendingUp} prefix="$" change={filteredSummary.total_revenue > filteredSummary.total_spend ? 'up' : 'down'} trend={filteredSummary.total_revenue > filteredSummary.total_spend ? 'up' : 'down'} iconColor="text-green-400" iconBg="bg-green-500/10" />
+            <StatCard title="Revenue" value={filteredSummary.total_revenue} icon={TrendingUp} prefix="$" trend={filteredSummary.total_revenue > filteredSummary.total_spend ? 'up' : 'down'} iconColor="text-green-400" iconBg="bg-green-500/10" />
             <StatCard title="Leads" value={filteredSummary.total_leads} icon={Users} iconColor="text-cyan-400" iconBg="bg-cyan-500/10" />
             <StatCard title="Ventas" value={filteredSummary.total_sales} icon={ShoppingCart} iconColor="text-purple-400" iconBg="bg-purple-500/10" />
           </div>
@@ -441,7 +368,7 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                   <XAxis dataKey="name" stroke="#64748b" fontSize={10} />
                   <YAxis stroke="#64748b" fontSize={10} />
-                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} labelStyle={{ color: '#f1f5f9' }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} />
                   <Bar dataKey="gasto" fill="#ef4444" name="Gasto" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="revenue" fill="#22c55e" name="Revenue" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -449,9 +376,17 @@ export default function Dashboard() {
             </div>
             <div className="glass rounded-2xl p-5">
               <h3 className="font-display font-semibold text-white mb-5">Distribución de Gasto</h3>
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart><Pie data={preparePieData()} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={5} dataKey="value">{preparePieData().map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} formatter={(value) => formatCurrency(value)} /></PieChart>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart><Pie data={preparePieData()} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={5} dataKey="value">{preparePieData().map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} formatter={(value) => formatCurrency(value)} /></PieChart>
               </ResponsiveContainer>
+              <div className="flex flex-wrap justify-center gap-3 mt-2">
+                {preparePieData().map((entry, index) => (
+                  <div key={entry.name} className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                    <span className="text-xs text-dark-300">{entry.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -486,81 +421,181 @@ export default function Dashboard() {
 
               {/* Tasas */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="glass rounded-2xl p-3 border border-green-500/20">
-                  <div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Tasa Entrega</p><p className="text-lg font-bold text-green-400">{dropiData.orders?.effective_delivery_rate || 0}%</p></div><Target className="w-4 h-4 text-green-400" /></div>
-                </div>
-                <div className="glass rounded-2xl p-3 border border-red-500/20">
-                  <div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Tasa Devolución</p><p className="text-lg font-bold text-red-400">{dropiData.orders?.effective_return_rate || 0}%</p></div><RotateCcw className="w-4 h-4 text-red-400" /></div>
-                </div>
-                <div className="glass rounded-2xl p-3 border border-gray-500/20">
-                  <div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Tasa Cancelación</p><p className="text-lg font-bold text-gray-400">{dropiData.orders?.cancellation_rate || 0}%</p></div><X className="w-4 h-4 text-gray-400" /></div>
-                </div>
-                <div className="glass rounded-2xl p-3 border border-cyan-500/20">
-                  <div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Completada</p><p className="text-lg font-bold text-cyan-400">{dropiData.orders?.completion_rate || 0}%</p></div><Check className="w-4 h-4 text-cyan-400" /></div>
-                </div>
+                <div className="glass rounded-2xl p-3 border border-green-500/20"><div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Tasa Entrega</p><p className="text-lg font-bold text-green-400">{dropiData.orders?.effective_delivery_rate || 0}%</p></div><Target className="w-4 h-4 text-green-400" /></div><p className="text-[9px] text-dark-500 mt-1">{dropiData.orders?.delivered || 0} de {(dropiData.orders?.delivered || 0) + (dropiData.orders?.returned || 0)} completados</p></div>
+                <div className="glass rounded-2xl p-3 border border-red-500/20"><div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Tasa Devolución</p><p className="text-lg font-bold text-red-400">{dropiData.orders?.effective_return_rate || 0}%</p></div><RotateCcw className="w-4 h-4 text-red-400" /></div><p className="text-[9px] text-dark-500 mt-1">{dropiData.orders?.returned || 0} devoluciones</p></div>
+                <div className="glass rounded-2xl p-3 border border-gray-500/20"><div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Tasa Cancelación</p><p className="text-lg font-bold text-gray-400">{dropiData.orders?.cancellation_rate || 0}%</p></div><X className="w-4 h-4 text-gray-400" /></div><p className="text-[9px] text-dark-500 mt-1">{dropiData.orders?.cancelled || 0} cancelados</p></div>
+                <div className="glass rounded-2xl p-3 border border-cyan-500/20"><div className="flex items-center justify-between"><div><p className="text-[10px] text-dark-400">Operación Completada</p><p className="text-lg font-bold text-cyan-400">{dropiData.orders?.completion_rate || 0}%</p></div><Check className="w-4 h-4 text-cyan-400" /></div><p className="text-[9px] text-dark-500 mt-1">{(dropiData.orders?.delivered || 0) + (dropiData.orders?.returned || 0)} de {dropiData.orders?.total_operativo || 0} operativos</p></div>
               </div>
+
+              {/* Tendencia de Pedidos por Día */}
+              {dropiData.daily && dropiData.daily.length > 0 && (
+                <div className="glass rounded-2xl p-5">
+                  <h3 className="font-display font-semibold text-white mb-4">Tendencia de Pedidos por Día</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={dropiData.daily}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis dataKey="date" stroke="#64748b" fontSize={10} tickFormatter={(v) => { const d = new Date(v); return `${d.getDate()}/${d.getMonth()+1}` }} />
+                      <YAxis stroke="#64748b" fontSize={10} />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} labelFormatter={(v) => new Date(v).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })} />
+                      <Legend />
+                      <Line type="monotone" dataKey="delivered" stroke="#22c55e" strokeWidth={2} name="Entregados" dot={{ fill: '#22c55e', r: 2 }} />
+                      <Line type="monotone" dataKey="returned" stroke="#ef4444" strokeWidth={2} name="Devueltos" dot={{ fill: '#ef4444', r: 2 }} />
+                      <Line type="monotone" dataKey="pending" stroke="#f59e0b" strokeWidth={2} name="Pendientes" dot={{ fill: '#f59e0b', r: 2 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
 
               {/* Estado de Pedidos Pie */}
               <div className="glass rounded-2xl p-5">
-                <h3 className="font-display font-semibold text-white mb-5">Estado de Pedidos</h3>
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart><Pie data={prepareDropiPieData()} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={5} dataKey="value">{prepareDropiPieData().map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}</Pie><Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} /></PieChart>
+                <h3 className="font-display font-semibold text-white mb-4">Estado de Pedidos</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart><Pie data={prepareDropiPieData()} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={5} dataKey="value">{prepareDropiPieData().map((entry, i) => <Cell key={`cell-${i}`} fill={entry.color} />)}</Pie><Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} /></PieChart>
                 </ResponsiveContainer>
-                <div className="flex flex-wrap justify-center gap-3 mt-3">{prepareDropiPieData().map((entry) => (<div key={entry.name} className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} /><span className="text-xs text-dark-300">{entry.name}: {entry.value}</span></div>))}</div>
+                <div className="flex flex-wrap justify-center gap-3 mt-2">{prepareDropiPieData().map((entry) => (<div key={entry.name} className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} /><span className="text-xs text-dark-300">{entry.name}: {entry.value}</span></div>))}</div>
               </div>
             </div>
           )}
 
-          {/* Wallet Section */}
+          {/* WALLET / FLUJO DE CAJA */}
           {walletHistory?.summary && dropiData?.connected && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-purple-500/10"><Receipt className="w-5 h-5 text-purple-400" /></div>
-                  <div><h3 className="font-display font-semibold text-white">Flujo de Caja Real</h3><p className="text-xs text-dark-400">Ingresos/egresos de wallet</p></div>
+                  <div><h3 className="font-display font-semibold text-white">Flujo de Caja Real</h3><p className="text-xs text-dark-400">Cuándo entró/salió el dinero de tu wallet</p></div>
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-r from-purple-500/20 to-transparent" />
               </div>
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="glass rounded-2xl p-4 border border-green-500/20"><div className="flex items-center gap-2 mb-2"><ArrowDownLeft className="w-4 h-4 text-green-400" /><span className="text-green-400 text-xs font-medium">Total Ingresos</span></div><p className="text-lg font-display font-bold text-green-400">{formatCurrency(walletHistory.summary.total_in)}</p></div>
                 <div className="glass rounded-2xl p-4 border border-red-500/20"><div className="flex items-center gap-2 mb-2"><ArrowUpRight className="w-4 h-4 text-red-400" /><span className="text-red-400 text-xs font-medium">Total Egresos</span></div><p className="text-lg font-display font-bold text-red-400">{formatCurrency(walletHistory.summary.total_out)}</p></div>
                 <div className={`glass rounded-2xl p-4 border ${walletHistory.summary.net >= 0 ? 'border-lucid-500/20' : 'border-orange-500/20'}`}><div className="flex items-center gap-2 mb-2"><CircleDollarSign className={`w-4 h-4 ${walletHistory.summary.net >= 0 ? 'text-lucid-400' : 'text-orange-400'}`} /><span className={`text-xs font-medium ${walletHistory.summary.net >= 0 ? 'text-lucid-400' : 'text-orange-400'}`}>Balance Neto</span></div><p className={`text-lg font-display font-bold ${walletHistory.summary.net >= 0 ? 'text-lucid-400' : 'text-orange-400'}`}>{formatCurrency(walletHistory.summary.net)}</p></div>
                 <div className="glass rounded-2xl p-4 border border-dark-600"><div className="flex items-center gap-2 mb-2"><Activity className="w-4 h-4 text-dark-400" /><span className="text-dark-400 text-xs font-medium">Transacciones</span></div><p className="text-lg font-display font-bold text-white">{walletHistory.summary.count}</p></div>
               </div>
-            </div>
-          )}
 
-          {/* Reconciliation */}
-          {dropiData?.reconciliation && (
-            <div className="glass rounded-2xl p-5">
-              <h3 className="font-display font-semibold text-white mb-4">Rentabilidad por Pedido</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-                <div className="bg-emerald-500/10 rounded-xl p-3 text-center border border-emerald-500/20"><p className="text-[10px] text-emerald-400 mb-1">✅ Ganancias Cobradas</p><p className="text-base font-bold text-emerald-400">{formatCurrency(dropiData.reconciliation.entregas_cobradas_monto)}</p></div>
-                <div className="bg-emerald-500/5 rounded-xl p-3 text-center border border-emerald-500/10 border-dashed"><p className="text-[10px] text-emerald-300/70 mb-1">⏳ Pendientes</p><p className="text-base font-bold text-emerald-300/70">{formatCurrency(dropiData.reconciliation.entregas_pendientes_monto)}</p></div>
-                <div className="bg-orange-500/10 rounded-xl p-3 text-center border border-orange-500/20"><p className="text-[10px] text-orange-400 mb-1">✅ Devs Cobradas</p><p className="text-base font-bold text-orange-400">{formatCurrency(dropiData.reconciliation.devoluciones_cobradas_monto)}</p></div>
-                <div className="bg-orange-500/5 rounded-xl p-3 text-center border border-orange-500/10 border-dashed"><p className="text-[10px] text-orange-300/70 mb-1">⏳ Devs Pend.</p><p className="text-base font-bold text-orange-300/70">{formatCurrency(dropiData.reconciliation.devoluciones_pendientes_monto)}</p></div>
-              </div>
-              <div className={`p-3 rounded-xl ${dropiData.reconciliation.utilidad_neta >= 0 ? 'bg-gradient-to-r from-lucid-500/20 to-cyan-500/20 border border-lucid-500/30' : 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30'}`}>
-                <div className="flex items-center justify-between">
-                  <p className={`text-sm ${dropiData.reconciliation.utilidad_neta >= 0 ? 'text-lucid-400' : 'text-red-400'}`}>{dropiData.reconciliation.utilidad_neta >= 0 ? '🎯 UTILIDAD NETA' : '⚠️ PÉRDIDA'}</p>
-                  <p className={`text-xl font-bold ${dropiData.reconciliation.utilidad_neta >= 0 ? 'text-lucid-400' : 'text-red-400'}`}>{formatCurrency(dropiData.reconciliation.utilidad_neta)}</p>
+              {/* Gráfica Ingresos vs Egresos por Día */}
+              {walletHistory.daily && walletHistory.daily.length > 0 && (
+                <div className="glass rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-display font-semibold text-white">Ingresos vs Egresos por Día</h3>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-green-500" /><span className="text-xs text-dark-300">Ingresos</span></div>
+                      <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-red-500" /><span className="text-xs text-dark-300">Egresos</span></div>
+                    </div>
+                  </div>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <AreaChart data={walletHistory.daily}>
+                      <defs>
+                        <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/><stop offset="95%" stopColor="#22c55e" stopOpacity={0}/></linearGradient>
+                        <linearGradient id="colorEgresos" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/><stop offset="95%" stopColor="#ef4444" stopOpacity={0}/></linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                      <XAxis dataKey="display_date" stroke="#64748b" fontSize={10} />
+                      <YAxis stroke="#64748b" fontSize={10} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} formatter={(v, n) => [formatCurrency(v), n === 'ingresos' ? '💰 Ingresos' : '💸 Egresos']} labelFormatter={(l) => `📅 ${l}`} />
+                      <Area type="monotone" dataKey="ingresos" stroke="#22c55e" strokeWidth={2} fillOpacity={1} fill="url(#colorIngresos)" dot={{ r: 2, fill: '#22c55e' }} />
+                      <Area type="monotone" dataKey="egresos" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorEgresos)" dot={{ r: 2, fill: '#ef4444' }} />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
-              </div>
+              )}
+
+              {/* Rentabilidad con Gráfica de Ganancias/Devoluciones por día */}
+              {dropiData?.orders && (
+                <div className="glass rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div><h3 className="font-display font-semibold text-white">Rentabilidad por Pedido</h3><p className="text-xs text-dark-400">Basado en fecha de creación del pedido</p></div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span className="text-xs text-dark-300">Ganancias</span></div>
+                      <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-orange-500" /><span className="text-xs text-dark-300">Devoluciones</span></div>
+                    </div>
+                  </div>
+
+                  {dropiData?.reconciliation && (
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                        <div className="bg-emerald-500/10 rounded-xl p-3 text-center border border-emerald-500/20"><p className="text-[10px] text-emerald-400 mb-1">✅ Ganancias Cobradas</p><p className="text-base font-bold text-emerald-400">{formatCurrency(dropiData.reconciliation.entregas_cobradas_monto)}</p><p className="text-[9px] text-emerald-400/60">{dropiData.reconciliation.entregas_cobradas} entregas</p></div>
+                        <div className="bg-emerald-500/5 rounded-xl p-3 text-center border border-emerald-500/10 border-dashed"><p className="text-[10px] text-emerald-300/70 mb-1">⏳ Ganancias Pendientes</p><p className="text-base font-bold text-emerald-300/70">{formatCurrency(dropiData.reconciliation.entregas_pendientes_monto)}</p><p className="text-[9px] text-emerald-300/50">{dropiData.reconciliation.entregas_pendientes} por cobrar</p></div>
+                        <div className="bg-orange-500/10 rounded-xl p-3 text-center border border-orange-500/20"><p className="text-[10px] text-orange-400 mb-1">✅ Devs Cobradas</p><p className="text-base font-bold text-orange-400">{formatCurrency(dropiData.reconciliation.devoluciones_cobradas_monto)}</p><p className="text-[9px] text-orange-400/60">{dropiData.reconciliation.devoluciones_cobradas} descontadas</p></div>
+                        <div className="bg-orange-500/5 rounded-xl p-3 text-center border border-orange-500/10 border-dashed"><p className="text-[10px] text-orange-300/70 mb-1">⏳ Devs Pendientes</p><p className="text-base font-bold text-orange-300/70">{formatCurrency(dropiData.reconciliation.devoluciones_pendientes_monto)}</p><p className="text-[9px] text-orange-300/50">{dropiData.reconciliation.devoluciones_pendientes} por descontar</p></div>
+                      </div>
+
+                      <div className={`mb-4 p-3 rounded-xl ${dropiData.reconciliation.utilidad_neta >= 0 ? 'bg-gradient-to-r from-lucid-500/20 to-cyan-500/20 border border-lucid-500/30' : 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30'}`}>
+                        <div className="flex items-center justify-between">
+                          <div><p className={`text-sm ${dropiData.reconciliation.utilidad_neta >= 0 ? 'text-lucid-400' : 'text-red-400'}`}>{dropiData.reconciliation.utilidad_neta >= 0 ? '🎯 UTILIDAD NETA DEL PERÍODO' : '⚠️ PÉRDIDA DEL PERÍODO'}</p><p className="text-[10px] text-dark-400">Cobrada + Pendiente = Total</p></div>
+                          <p className={`text-xl font-bold ${dropiData.reconciliation.utilidad_neta >= 0 ? 'text-lucid-400' : 'text-red-400'}`}>{formatCurrency(dropiData.reconciliation.utilidad_neta)}</p>
+                        </div>
+                      </div>
+
+                      {dropiData.reconciliation.en_ruta > 0 && (
+                        <div className="mb-4 p-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                          <p className="text-xs text-yellow-400">🚚 <strong>{dropiData.reconciliation.en_ruta}</strong> pedidos en ruta por valor potencial de <strong>{formatCurrency(dropiData.reconciliation.en_ruta_monto)}</strong></p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Gráfica de Ganancias Cobradas/Pendientes por día */}
+                  {dropiData?.daily_reconciled && dropiData.daily_reconciled.length > 0 && (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <AreaChart data={dropiData.daily_reconciled}>
+                        <defs>
+                          <linearGradient id="colorGanCob" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.6}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient>
+                          <linearGradient id="colorGanPend" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#22d3ee" stopOpacity={0.4}/><stop offset="95%" stopColor="#22d3ee" stopOpacity={0}/></linearGradient>
+                          <linearGradient id="colorDevCob" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#f97316" stopOpacity={0.6}/><stop offset="95%" stopColor="#f97316" stopOpacity={0}/></linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                        <XAxis dataKey="display_date" stroke="#64748b" fontSize={10} />
+                        <YAxis stroke="#64748b" fontSize={10} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} />
+                        <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }} formatter={(v, n) => { const labels = { ganancias_cobradas: '✅ Ganancias Cobradas', ganancias_pendientes: '⏳ Ganancias Pendientes', devoluciones_cobradas: '↩️ Devoluciones Cobradas' }; return [formatCurrency(v), labels[n] || n] }} labelFormatter={(l) => `📅 ${l}`} />
+                        <Area type="monotone" dataKey="ganancias_cobradas" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorGanCob)" stackId="ganancias" dot={{ r: 2, fill: '#10b981' }} />
+                        <Area type="monotone" dataKey="ganancias_pendientes" stroke="#22d3ee" strokeWidth={2} strokeDasharray="5 5" fillOpacity={1} fill="url(#colorGanPend)" stackId="ganancias" dot={{ r: 2, fill: '#22d3ee' }} />
+                        <Area type="monotone" dataKey="devoluciones_cobradas" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorDevCob)" dot={{ r: 2, fill: '#f97316' }} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Calculadora */}
+          {/* CALCULADORA DE PROYECCIÓN CON SELECTOR DE CAMPAÑAS */}
           {walletHistory?.dropshipping && data?.summary && (
             <div className="glass rounded-2xl p-5 border border-lucid-500/20">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-xl bg-lucid-500/10"><Target className="w-5 h-5 text-lucid-400" /></div>
-                <div><h3 className="font-display font-semibold text-white">Calculadora de Proyección</h3><p className="text-xs text-dark-400">Estima ganancia/pérdida según % entrega</p></div>
+                <div><h3 className="font-display font-semibold text-white">Calculadora de Proyección</h3><p className="text-xs text-dark-400">Estima tu ganancia/pérdida según % de entrega</p></div>
               </div>
+
+              {/* Selector de Campañas para Ads */}
+              <div className="mb-4">
+                <label className="text-xs text-dark-400 mb-2 block">Campañas a incluir en gasto publicitario:</label>
+                <div className="flex flex-wrap gap-2">
+                  {availableCampaigns.map(campaign => (
+                    <button key={campaign} onClick={() => setSelectedProjectionCampaigns(prev => prev.includes(campaign) ? prev.filter(c => c !== campaign) : [...prev, campaign])} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${selectedProjectionCampaigns.includes(campaign) ? 'bg-lucid-500 text-white' : 'bg-dark-700 text-dark-300 hover:bg-dark-600'}`}>
+                      {campaign}
+                    </button>
+                  ))}
+                </div>
+                {selectedProjectionCampaigns.length > 0 && (
+                  <p className="text-xs text-lucid-400 mt-2">Gasto seleccionado: {formatCurrency(data.ads?.filter(ad => selectedProjectionCampaigns.includes(ad.campaign_name)).reduce((sum, ad) => sum + (ad.spend || 0), 0) || 0)}</p>
+                )}
+              </div>
+
+              {dropiData?.orders?.completion_rate >= 95 && (
+                <div className="mb-4 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+                  <p className="text-sm text-cyan-400 text-center">✅ Operación {dropiData.orders.completion_rate}% completada — Solo quedan <span className="font-bold">{dropiData.orders.en_ruta}</span> pedido(s) por definir</p>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                <div><label className="text-xs text-dark-400 mb-1 block">En Ruta 🚚</label><input type="number" value={projectionPending} onChange={(e) => setProjectionPending(parseInt(e.target.value) || 0)} className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm" min="0" /></div>
-                <div className="col-span-2"><label className="text-xs text-dark-400 mb-1 block">% Entrega: <span className="text-lucid-400 font-bold">{projectionDeliveryRate}%</span></label><input type="range" min="0" max="100" value={projectionDeliveryRate} onChange={(e) => setProjectionDeliveryRate(parseInt(e.target.value))} className="w-full h-2 bg-dark-600 rounded-lg appearance-none cursor-pointer accent-lucid-500" /></div>
+                <div><label className="text-xs text-dark-400 mb-1 block">Pedidos En Ruta 🚚 <span className="text-[10px] text-dark-500">(auto)</span></label><input type="number" value={projectionPending} onChange={(e) => setProjectionPending(parseInt(e.target.value) || 0)} className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm" min="0" /></div>
+                <div className="col-span-2"><label className="text-xs text-dark-400 mb-1 block">% Entrega Proyectado: <span className="text-lucid-400 font-bold">{projectionDeliveryRate}%</span> <span className="text-[10px] text-dark-500">(actual: {dropiData?.orders?.effective_delivery_rate || 0}%)</span></label><input type="range" min="0" max="100" value={projectionDeliveryRate} onChange={(e) => setProjectionDeliveryRate(parseInt(e.target.value))} className="w-full h-2 bg-dark-600 rounded-lg appearance-none cursor-pointer accent-lucid-500" /><div className="flex justify-between text-[10px] text-dark-500 mt-1"><span>0%</span><span>50%</span><span>100%</span></div></div>
                 <div><label className="text-xs text-dark-400 mb-1 block">Entregarán</label><div className="bg-emerald-500/10 rounded-lg px-3 py-2 text-emerald-400 font-bold text-center">{Math.round(projectionPending * projectionDeliveryRate / 100)}</div></div>
               </div>
+
               {(() => {
                 const pendingToDeliver = Math.round(projectionPending * projectionDeliveryRate / 100)
                 const pendingToReturn = projectionPending - pendingToDeliver
@@ -574,13 +609,17 @@ export default function Dashboard() {
                 const ordersReturned = dropiData?.orders?.returned || 0
                 const currentUtility = ordersDeliveredProfit - (ordersReturned * avgReturn)
                 const projectedTotal = currentUtility + projectedGains - projectedReturns - adSpend
+
                 return (
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                    <div className="bg-dark-700/50 rounded-xl p-2 text-center"><p className="text-[9px] text-dark-400">Utilidad Actual</p><p className="text-sm font-bold text-cyan-400">{formatCurrency(currentUtility)}</p></div>
-                    <div className="bg-emerald-500/10 rounded-xl p-2 text-center"><p className="text-[9px] text-emerald-400">+ Entregas</p><p className="text-sm font-bold text-emerald-400">{formatCurrency(projectedGains)}</p></div>
-                    <div className="bg-orange-500/10 rounded-xl p-2 text-center"><p className="text-[9px] text-orange-400">- Devs</p><p className="text-sm font-bold text-orange-400">{formatCurrency(projectedReturns)}</p></div>
-                    <div className="bg-red-500/10 rounded-xl p-2 text-center"><p className="text-[9px] text-red-400">- Ads</p><p className="text-sm font-bold text-red-400">{formatCurrency(adSpend)}</p></div>
-                    <div className={`${projectedTotal >= 0 ? 'bg-gradient-to-br from-lucid-500/20 to-cyan-500/20' : 'bg-gradient-to-br from-red-500/20 to-orange-500/20'} rounded-xl p-2 text-center`}><p className={`text-[9px] ${projectedTotal >= 0 ? 'text-lucid-400' : 'text-red-400'}`}>{projectedTotal >= 0 ? '🎯 GANANCIA' : '⚠️ PÉRDIDA'}</p><p className={`text-base font-bold ${projectedTotal >= 0 ? 'text-lucid-400' : 'text-red-400'}`}>{formatCurrency(Math.abs(projectedTotal))}</p></div>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div className="bg-dark-700/50 rounded-xl p-3 text-center"><p className="text-[10px] text-dark-400 mb-1">Utilidad Actual</p><p className="text-sm font-bold text-cyan-400">{formatCurrency(currentUtility)}</p></div>
+                    <div className="bg-emerald-500/10 rounded-xl p-3 text-center"><p className="text-[10px] text-emerald-400 mb-1">+ Proyección Entregas</p><p className="text-sm font-bold text-emerald-400">{formatCurrency(projectedGains)}</p><p className="text-[9px] text-emerald-400/60">{pendingToDeliver} × {formatCurrency(avgGain)}</p></div>
+                    <div className="bg-orange-500/10 rounded-xl p-3 text-center"><p className="text-[10px] text-orange-400 mb-1">- Proyección Devs</p><p className="text-sm font-bold text-orange-400">{formatCurrency(projectedReturns)}</p><p className="text-[9px] text-orange-400/60">{pendingToReturn} × {formatCurrency(avgReturn)}</p></div>
+                    <div className="bg-red-500/10 rounded-xl p-3 text-center"><p className="text-[10px] text-red-400 mb-1">- Gasto Ads</p><p className="text-sm font-bold text-red-400">{formatCurrency(adSpend)}</p><p className="text-[9px] text-red-400/60">{selectedProjectionCampaigns.length} campaña(s)</p></div>
+                    <div className={`${projectedTotal >= 0 ? 'bg-gradient-to-br from-lucid-500/20 to-cyan-500/20 border-lucid-500/30' : 'bg-gradient-to-br from-red-500/20 to-orange-500/20 border-red-500/30'} border rounded-xl p-3 text-center`}>
+                      <p className={`text-[10px] ${projectedTotal >= 0 ? 'text-lucid-400' : 'text-red-400'} mb-1`}>{projectedTotal >= 0 ? '🎯 GANANCIA' : '⚠️ PÉRDIDA'}</p>
+                      <p className={`text-lg font-bold ${projectedTotal >= 0 ? 'text-lucid-400' : 'text-red-400'}`}>{formatCurrency(Math.abs(projectedTotal))}</p>
+                    </div>
                   </div>
                 )
               })()}
