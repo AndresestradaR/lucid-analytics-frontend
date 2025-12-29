@@ -3,6 +3,8 @@ import { api } from '../utils/api'
 
 const AuthContext = createContext(null)
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.lucidestrategasia.online/api'
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -29,8 +31,20 @@ export function AuthProvider({ children }) {
   }
 
   const login = async (email, password) => {
-    const response = await api.post('/auth/login', { email, password })
-    const { access_token, user: userData } = response.data
+    // Usar fetch directamente para evitar el redirect automatico del api.js en 401
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    
+    const data = await response.json()
+    
+    if (!response.ok) {
+      throw new Error(data.detail || 'Credenciales invalidas')
+    }
+    
+    const { access_token, user: userData } = data
     localStorage.setItem('token', access_token)
     setUser(userData)
     return userData
