@@ -26,7 +26,8 @@ import {
   Wallet,
   ArrowDownLeft,
   CircleDollarSign,
-  Receipt
+  Receipt,
+  CloudDownload
 } from 'lucide-react'
 import { 
   AreaChart, 
@@ -350,6 +351,8 @@ export default function Dashboard() {
   const [availableCampaigns, setAvailableCampaigns] = useState([])
   const [selectedStatuses, setSelectedStatuses] = useState([])
   const [chatOpen, setChatOpen] = useState(false)
+  const [syncingMeta, setSyncingMeta] = useState(false)
+  const [syncMessage, setSyncMessage] = useState(null)
 
   useEffect(() => {
     loadAccounts()
@@ -400,6 +403,37 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error('Error loading accounts:', err)
+    }
+  }
+
+  const syncMetaAccounts = async () => {
+    setSyncingMeta(true)
+    setSyncMessage(null)
+    try {
+      const response = await api.post('/meta/sync-accounts')
+      const { new_accounts, updated_accounts, total_accounts, message } = response.data
+      
+      // Mostrar mensaje de éxito
+      setSyncMessage({
+        type: 'success',
+        text: `✅ ${message}`,
+        details: new_accounts.length > 0 
+          ? `Nuevas: ${new_accounts.map(a => a.name).join(', ')}`
+          : null
+      })
+      
+      // Recargar cuentas
+      await loadAccounts()
+      
+      // Auto-ocultar mensaje después de 5 segundos
+      setTimeout(() => setSyncMessage(null), 5000)
+    } catch (err) {
+      setSyncMessage({
+        type: 'error',
+        text: err.response?.data?.detail || 'Error sincronizando cuentas'
+      })
+    } finally {
+      setSyncingMeta(false)
     }
   }
 
@@ -542,17 +576,27 @@ export default function Dashboard() {
 
         <div className="flex flex-wrap items-center gap-3">
           {accounts.length > 0 && (
-            <select
-              value={selectedAccount}
-              onChange={(e) => {
-                setSelectedAccount(e.target.value)
-                setSelectedCampaigns([])
-                setSelectedStatuses([])
-              }}
-              className="px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm focus:outline-none focus:border-lucid-500"
-            >
-              {accounts.map(acc => <option key={acc.account_id} value={acc.account_id}>{acc.account_name}</option>)}
-            </select>
+            <div className="flex items-center gap-1">
+              <select
+                value={selectedAccount}
+                onChange={(e) => {
+                  setSelectedAccount(e.target.value)
+                  setSelectedCampaigns([])
+                  setSelectedStatuses([])
+                }}
+                className="px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm focus:outline-none focus:border-lucid-500"
+              >
+                {accounts.map(acc => <option key={acc.account_id} value={acc.account_id}>{acc.account_name}</option>)}
+              </select>
+              <button
+                onClick={syncMetaAccounts}
+                disabled={syncingMeta}
+                title="Sincronizar cuentas de Meta Ads"
+                className="p-2 bg-dark-800 border border-dark-700 rounded-xl text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50 transition-all disabled:opacity-50"
+              >
+                <CloudDownload className={`w-4 h-4 ${syncingMeta ? 'animate-pulse' : ''}`} />
+              </button>
+            </div>
           )}
 
           {availableCampaigns.length > 0 && (
@@ -576,6 +620,19 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {/* Sync Message */}
+      {syncMessage && (
+        <div className={`flex items-center gap-3 p-4 rounded-xl ${syncMessage.type === 'success' ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+          <div className="flex-1">
+            <p className="font-medium">{syncMessage.text}</p>
+            {syncMessage.details && <p className="text-sm opacity-80 mt-1">{syncMessage.details}</p>}
+          </div>
+          <button onClick={() => setSyncMessage(null)} className="p-1 hover:bg-white/10 rounded">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
